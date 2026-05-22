@@ -1,120 +1,81 @@
-# Simple Web App Containerized with Docker
+﻿# Simple Web App Containerized with Docker
 
 ![Node.js](https://img.shields.io/badge/Node.js-20.x-339933?logo=node.js&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-4.x-000000?logo=express&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?logo=docker&logoColor=white)
-![Status](https://img.shields.io/badge/Status-Minimal%20SRE%20Exercise-blue)
+![Status](https://img.shields.io/badge/Status-Working-success)
 
-> Minimal SRE practice project to build, run, observe, and containerize a simple HTTP service with Node.js, Express, and Docker.
+A minimal Node.js and Express service built for SRE practice, featuring Docker containerization, health checks, environment-based configuration, and stdout logging.
 
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Exercise Goal](#exercise-goal)
-3. [Stack and Tools](#stack-and-tools)
-4. [Development Approach](#development-approach)
-5. [Project Structure](#project-structure)
-6. [Architecture and Flow](#architecture-and-flow)
-7. [Endpoints](#endpoints)
-8. [Configuration](#configuration)
-9. [Observability](#observability)
-10. [Local Installation and Run](#local-installation-and-run)
-11. [Docker Usage](#docker-usage)
-12. [Validation Checklist](#validation-checklist)
-13. [Technical Decisions](#technical-decisions)
-14. [Troubleshooting](#troubleshooting)
-15. [Using This Project with Codex](#using-this-project-with-codex)
-16. [Future Improvements](#future-improvements)
+2. [Objectives](#objectives)
+3. [Tech Stack](#tech-stack)
+4. [Project Structure](#project-structure)
+5. [Architecture](#architecture)
+6. [Endpoints](#endpoints)
+7. [Configuration](#configuration)
+8. [Logging and Observability](#logging-and-observability)
+9. [Running Locally](#running-locally)
+10. [Running with Docker](#running-with-docker)
+11. [Validation](#validation)
+12. [Design Notes](#design-notes)
+13. [Troubleshooting](#troubleshooting)
+14. [Next Improvements](#next-improvements)
 
 ---
 
 ## Overview
 
-This project implements a minimal web application focused on operational clarity.
+This project implements a small HTTP service designed to demonstrate a clean operational baseline:
 
-The app:
+- a simple web application
+- containerization with Docker
+- configurable runtime via environment variables
+- request and startup logging to stdout
+- a basic health endpoint for service checks
 
-- exposes an HTTP server
-- returns JSON from `/`
-- exposes a health check at `/health`
-- uses `PORT` as an environment variable
-- writes logs to `stdout`
-- can run inside Docker
-
-### Expected Outcomes
-
-| Capability | Expected Result |
-|---|---|
-| HTTP service | Responds correctly |
-| Configuration | Uses `PORT` or defaults to `3000` |
-| Observability | Logs are visible in console and through `docker logs` |
-| Containerization | The app can be built and run with Docker |
+The implementation is intentionally small and keeps the focus on runtime behavior rather than application complexity.
 
 ---
 
-## Exercise Goal
+## Objectives
 
-The goal of this exercise is to demonstrate real service operation fundamentals:
+This exercise covers the following core concepts:
 
-- building a simple application
-- exposing a network port
-- configuring runtime through environment variables
-- implementing basic logging
-- packaging the service in a reproducible container
-
-> The focus is not feature complexity. The focus is operational clarity.
+- exposing an HTTP service
+- returning JSON responses
+- using `PORT` for runtime configuration
+- writing logs to standard output
+- packaging the service in a Docker image
+- validating service behavior both locally and in a container
 
 ---
 
-## Stack and Tools
+## Tech Stack
 
-| Tool | Role in the project |
+| Tool | Purpose |
 |---|---|
-| `Node.js` | Runtime used to execute the application |
-| `Express` | Minimal HTTP framework |
-| `npm` | Dependency installation and project scripts |
+| `Node.js` | JavaScript runtime |
+| `Express` | HTTP server framework |
+| `npm` | Dependency management and scripts |
 | `Docker` | Container build and execution |
-| `Docker Desktop` | Local Docker engine on Windows |
-| `PowerShell` | Local commands, testing, and environment variables |
-| `docker logs` | Container log inspection |
+| `PowerShell` | Local execution and manual testing |
 
-### Documentation Files
+### Repository Files
 
-| File | Purpose |
+| File | Description |
 |---|---|
-| `SPEC.md` | Defines what to build |
-| `AGENTS.md` | Defines how the agent should work |
-| `README.md` | Explains how to understand, run, and validate the project |
-
----
-
-## Development Approach
-
-This project follows `spec-driven development`.
-
-That means:
-
-1. Define the system contract first.
-2. Implement the code second.
-3. Validate the implementation against explicit criteria.
-
-### Core Principles Used
-
-- reduce ambiguity before coding
-- turn requirements into testable contracts
-- separate `what to build` from `how to build it`
-- avoid over-engineering in small exercises
-
-<details>
-<summary>Why this helps when working with agents</summary>
-
-Agents produce more reliable results when project context is explicit.
-
-- `SPEC.md` reduces functional improvisation
-- `AGENTS.md` reduces technical improvisation
-- `README.md` improves operational understanding and context transfer
-
-</details>
+| `index.js` | Application entry point |
+| `package.json` | Project metadata, scripts, and dependencies |
+| `package-lock.json` | Locked dependency tree |
+| `Dockerfile` | Docker image definition |
+| `.dockerignore` | Excludes unnecessary files from Docker build context |
+| `.gitignore` | Excludes local artifacts from version control |
+| `SPEC.md` | Project specification |
+| `AGENTS.md` | Project conventions and working notes |
+| `README.md` | Project documentation |
 
 ---
 
@@ -123,6 +84,7 @@ Agents produce more reliable results when project context is explicit.
 ```text
 simple-web-app-containerized-with-docker/
 |- .dockerignore
+|- .gitignore
 |- AGENTS.md
 |- Dockerfile
 |- README.md
@@ -132,46 +94,32 @@ simple-web-app-containerized-with-docker/
 `- package.json
 ```
 
-### Quick Description
-
-| Path | Description |
-|---|---|
-| `index.js` | Express server and endpoints |
-| `package.json` | Dependencies and `start` script |
-| `package-lock.json` | Locked dependency versions |
-| `Dockerfile` | Container image definition |
-| `.dockerignore` | Files excluded from Docker build context |
-| `SPEC.md` | Functional and operational specification |
-| `AGENTS.md` | Implementation rules for the agent |
-| `README.md` | Full project documentation |
-
 ---
 
-## Architecture and Flow
+## Architecture
 
-The architecture is intentionally flat and minimal.
+The service uses a minimal single-process design.
 
 ```mermaid
 flowchart TD
-    A["HTTP Client"] --> B["Express App"]
-    B --> C["Logging Middleware"]
+    A["HTTP Client"] --> B["Express Application"]
+    B --> C["Request Logging Middleware"]
     C --> D["GET /"]
     C --> E["GET /health"]
-    C --> F["404 JSON"]
-    B --> G["stdout"]
-    H["PORT or 3000"] --> B
-    I["Docker Container"] --> B
+    C --> F["404 JSON Response"]
+    G["PORT env or 3000"] --> B
+    B --> H["stdout logs"]
+    I["Docker container"] --> B
 ```
 
 ### Runtime Flow
 
-1. `Node.js` runs `index.js`.
-2. `Express` creates the HTTP server.
-3. The service listens on `0.0.0.0`.
-4. The port comes from `PORT` or defaults to `3000`.
-5. Every request passes through the logging middleware.
-6. Endpoints return JSON responses.
-7. Logs remain available in the console and in Docker.
+1. `node index.js` starts the application.
+2. Express binds to `0.0.0.0`.
+3. The server listens on `PORT` or defaults to `3000`.
+4. Every incoming request is logged.
+5. The defined routes return JSON responses.
+6. Logs are visible locally and through `docker logs`.
 
 ---
 
@@ -179,9 +127,7 @@ flowchart TD
 
 ### `GET /`
 
-Confirms that the service is running.
-
-**Expected response**
+Returns a simple status payload.
 
 ```json
 {
@@ -192,9 +138,7 @@ Confirms that the service is running.
 
 ### `GET /health`
 
-Provides a minimal health response suitable for basic operational checks.
-
-**Expected response**
+Returns a basic health response.
 
 ```json
 {
@@ -204,7 +148,7 @@ Provides a minimal health response suitable for basic operational checks.
 
 ### Undefined Routes
 
-Return `404` in JSON:
+Any unspecified route returns `404` with a JSON response:
 
 ```json
 {
@@ -215,10 +159,10 @@ Return `404` in JSON:
 
 ### Endpoint Summary
 
-| Method | Route | Status | Purpose |
+| Method | Route | Status | Description |
 |---|---|---|---|
-| `GET` | `/` | `200` | Confirm the service is running |
-| `GET` | `/health` | `200` | Basic health check |
+| `GET` | `/` | `200` | Basic service response |
+| `GET` | `/health` | `200` | Health check endpoint |
 
 ---
 
@@ -226,30 +170,29 @@ Return `404` in JSON:
 
 ### Environment Variables
 
-| Variable | Description | Default Value |
+| Variable | Description | Default |
 |---|---|---|
-| `PORT` | Port used by the HTTP server | `3000` |
+| `PORT` | Listening port for the HTTP server | `3000` |
 
-### Runtime Rules
+### Runtime Behavior
 
-- if `PORT` exists, the app uses that value
-- if `PORT` does not exist, the app uses `3000`
-- the service binds to `0.0.0.0`
+- If `PORT` is set, the server uses that value.
+- If `PORT` is not set, the server listens on `3000`.
+- The application binds to `0.0.0.0` for container compatibility.
 
 ---
 
-## Observability
+## Logging and Observability
 
-The observability implemented here is basic, but appropriate for the exercise.
+The service writes logs to standard output.
 
-### What Gets Logged
+### Logged Events
 
 - server startup
-- HTTP method for every request
-- requested path
+- HTTP method and path for each request
 - ISO timestamp per request
 
-### Example Logs
+### Example
 
 ```text
 Server listening on 0.0.0.0:3000
@@ -257,22 +200,16 @@ Server listening on 0.0.0.0:3000
 2026-05-22T21:28:01.046Z GET /health
 ```
 
-### Why This Matters in SRE
-
-- confirms the process started correctly
-- confirms the service is receiving traffic
-- supports basic debugging
-- works directly with `docker logs`
+This is enough for basic runtime verification and container log inspection.
 
 ---
 
-## Local Installation and Run
+## Running Locally
 
 ### Prerequisites
 
-- `Node.js`
-- `npm`
-- `Docker Desktop` if you want to validate the container
+- Node.js
+- npm
 
 ### Install Dependencies
 
@@ -280,20 +217,20 @@ Server listening on 0.0.0.0:3000
 npm install
 ```
 
-### Run Locally
+### Start the Service
 
 ```powershell
 npm start
 ```
 
-### Run with a Custom Port
+### Start with a Custom Port
 
 ```powershell
 $env:PORT=3001
 npm start
 ```
 
-### Test Endpoints with PowerShell
+### Test the Endpoints
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:3000/
@@ -309,7 +246,7 @@ curl http://127.0.0.1:3000/health
 
 ---
 
-## Docker Usage
+## Running with Docker
 
 ### Build the Image
 
@@ -323,7 +260,13 @@ docker build -t sre-simple-web-app .
 docker run -p 3000:3000 sre-simple-web-app
 ```
 
-### Run with a Custom Port
+### Run on a Different Host Port
+
+```powershell
+docker run -p 3001:3000 sre-simple-web-app
+```
+
+### Run with a Custom Application Port
 
 ```powershell
 docker run -e PORT=3001 -p 3001:3001 sre-simple-web-app
@@ -336,139 +279,111 @@ docker logs <container_id>
 ```
 
 <details>
-<summary>What the Dockerfile does</summary>
+<summary>Dockerfile summary</summary>
 
-The `Dockerfile`:
+The image:
 
 - uses `node:20-alpine`
 - sets `/app` as the working directory
 - copies `package.json` and `package-lock.json`
 - installs dependencies with `npm install --omit=dev`
 - copies `index.js`
-- exposes `3000`
-- starts the app with `node index.js`
+- exposes port `3000`
+- starts the application with `node index.js`
 
 </details>
 
 ---
 
-## Validation Checklist
+## Validation
 
-### Functional Checklist
+The project has been verified with the following checks:
 
-- [x] The server starts correctly
+### Local Checks
+
+- [x] `npm install` completes successfully
+- [x] `npm start` starts the service
 - [x] `GET /` returns `200` with valid JSON
 - [x] `GET /health` returns `200`
-- [x] Logs appear in stdout
-- [x] `PORT` changes the actual listening port
+- [x] logs appear in the terminal
+- [x] `PORT` changes the listening port
 
-### Container Checklist
+### Docker Checks
 
-- [ ] `docker build` completes successfully
-- [ ] `docker run -p 3000:3000` exposes the service
-- [ ] `docker logs` shows process logs
-
-> Docker validation depends on Docker Desktop being started and the daemon being available.
+- [x] `docker build` completes successfully
+- [x] `docker run` starts the container
+- [x] the service is reachable through published ports
+- [x] `docker logs` shows startup and request logs
 
 ---
 
-## Technical Decisions
+## Design Notes
 
-| Decision | Reason |
+| Decision | Rationale |
 |---|---|
-| `Express` | Simple and sufficient for a minimal service |
-| Single `index.js` file | Avoids unnecessary layers |
-| Logs to `stdout` | Works naturally with containers and basic observability |
-| `0.0.0.0` binding | Required for external access from the container |
-| `PORT` via environment | Keeps configuration outside the code |
+| Single `index.js` file | Keeps the service simple and easy to inspect |
+| `Express` | Lightweight and sufficient for the exercise |
+| Logs to `stdout` | Works naturally in containers and local execution |
+| `0.0.0.0` binding | Required for external access in Docker |
+| `PORT` via environment variable | Keeps configuration outside the source code |
 
 ---
 
 ## Troubleshooting
 
 <details>
-<summary>`docker build` cannot connect to Docker</summary>
+<summary>Port is already allocated</summary>
 
-Possible causes:
+This usually means another local process or container is already using that host port.
 
-- Docker Desktop is not running
-- the Docker daemon is not available
+Useful commands:
 
-What to check:
-
-- open Docker Desktop
-- wait until the Linux engine is active
-- retry `docker build`
-
-</details>
-
-<details>
-<summary>The port is already in use</summary>
-
-Symptoms:
-
-- the app does not start
-- the bind operation fails
-
-Solution:
-
-- use a different `PORT`
-- stop the process using that port
-
-</details>
-
-<details>
-<summary>The endpoints do not respond</summary>
-
-What to check:
-
-- make sure the process is still running
-- confirm you are using the correct port
-- verify there is no local conflict or firewall issue
-
-</details>
-
----
-
-## Using This Project with Codex
-
-### Recommended Prompt
-
-```text
-Implement this project following SPEC.md and AGENTS.md. Start with a minimal Node.js Express server.
+```powershell
+docker ps
+docker stop <container_id>
 ```
 
-### Role of Each Document
+Or run the container on another host port:
 
-| File | Role |
-|---|---|
-| `SPEC.md` | Functional and operational contract |
-| `AGENTS.md` | Implementation rules and constraints |
-| `README.md` | Operational context and usage guide |
+```powershell
+docker run -p 3001:3000 sre-simple-web-app
+```
+
+</details>
+
+<details>
+<summary>Docker build cannot connect to the daemon</summary>
+
+Make sure Docker Desktop is running and the Docker engine is available before building or running containers.
+
+</details>
+
+<details>
+<summary>Endpoints do not respond</summary>
+
+Check that:
+
+- the service is still running
+- the correct port is being used
+- there is no conflict with another local process
+
+</details>
 
 ---
 
-## Future Improvements
+## Next Improvements
 
-If you want to evolve the project after the exercise, these improvements would make sense:
+Potential next steps for extending this exercise:
 
-- structured JSON logs
-- a `/metrics` endpoint
+- structured JSON logging
 - automated tests
+- a `/metrics` endpoint
 - richer health checks
-- a multi-stage `Dockerfile`
-- a basic CI pipeline
+- a multi-stage Docker build
+- CI pipeline integration
 
 ---
 
-## Final Summary
+## Final Notes
 
-This project is a small but correct base for practicing:
-
-- minimal service design
-- environment-based configuration
-- basic observability
-- containerization
-- specification-driven implementation
-
-> This is exactly the kind of exercise that helps build operational judgment without unnecessary complexity.
+This repository provides a compact but solid foundation for practicing service basics that are relevant to SRE work: runtime configuration, containerization, simple observability, and operational validation.
