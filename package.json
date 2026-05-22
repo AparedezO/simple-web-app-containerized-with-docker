@@ -1,0 +1,12 @@
+﻿{
+  "name": "simple-web-app-containerized-with-docker",
+  "version": "1.0.0",
+  "description": "Minimal SRE practice app with Express and Docker",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
