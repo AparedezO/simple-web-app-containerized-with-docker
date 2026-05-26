@@ -1,4 +1,4 @@
-﻿# Simple Web App Containerized with Docker
+# Simple Web App Containerized with Docker
 
 ![Node.js](https://img.shields.io/badge/Node.js-20.x-339933?logo=node.js&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-4.x-000000?logo=express&logoColor=white)
@@ -289,6 +289,7 @@ The image:
 - installs dependencies with `npm install --omit=dev`
 - copies `index.js`
 - exposes port `3000`
+- defines a Docker `HEALTHCHECK` against `/health`
 - starts the application with `node index.js`
 
 </details>
@@ -314,6 +315,7 @@ The project has been verified with the following checks:
 - [x] `docker run` starts the container
 - [x] the service is reachable through published ports
 - [x] `docker logs` shows startup and request logs
+- [x] the image defines a Docker `HEALTHCHECK` against `/health`
 
 ---
 
@@ -326,6 +328,7 @@ The project has been verified with the following checks:
 | Logs to `stdout` | Works naturally in containers and local execution |
 | `0.0.0.0` binding | Required for external access in Docker |
 | `PORT` via environment variable | Keeps configuration outside the source code |
+| Docker `HEALTHCHECK` | Adds a basic runtime health signal at the container level |
 
 ---
 
